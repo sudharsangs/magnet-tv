@@ -3,8 +3,8 @@ package handlers
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,17 +41,18 @@ func SendMagenetLink(c *fiber.Ctx) error {
 	c.Context().SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
 
 		for msg := range msgCh {
-			data := fmt.Sprintf("data: Message: %s\n\n", msg.Payload)
-			_, err := io.WriteString(c.Response().BodyWriter(), data)
+
+			data := fmt.Sprintf("data: %v", msg.Payload)
+			fmt.Fprintf(w, "%s\n\n", data)
+
+			err := w.Flush()
 			if err != nil {
-				fmt.Printf("Error while writing SSE data: %v\n", err)
+				fmt.Printf("Error while flushing: %v. Closing http connection.\n", err)
 				break
 			}
 		}
-
 	}))
 
-	// Return immediately after setting up the SSE connection
 	return nil
 }
 
@@ -69,12 +70,39 @@ func ReceiveMagnetLink(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.SendString("Data sent to SSE clients")
+	return c.JSON(fiber.Map{
+		"message": "success",
+	})
 }
 
 func QrHandler(c *fiber.Ctx) error {
-	deviceId := c.Get("X-Device-Id")
-	fmt.Println(deviceId)
+	ctx := c.Context()
+	deviceID := c.Get("X-Device-Id")
 
-	return nil
+	var device Device
+	db := config.GetDB()
+	err := db.NewSelect().
+		Model(&device).
+		Where("device_id = ?", deviceID).Scan(ctx)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			newDevice := &Device{
+				DeviceID: deviceID,
+			}
+			err := db.NewInsert().Model(newDevice)
+			if err != nil {
+				fmt.Println(err)
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": err,
+				})
+			}
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"device": device,
+	})
 }
