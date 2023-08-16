@@ -67,7 +67,9 @@ func ReceiveMagnetLink(c *fiber.Ctx) error {
 	channelName := os.Getenv("REDIS_CHANNEL_NAME")
 	err := rdb.Publish(ctx, channelName, postData.Link).Err()
 	if err != nil {
-		return err
+		return c.JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
 	return c.JSON(fiber.Map{
@@ -85,7 +87,9 @@ func QrHandler(c *fiber.Ctx) error {
 		Model(&device).
 		Where("device_id = ?", deviceID).Scan(ctx)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		fmt.Println(err)
+		if err == sql.ErrNoRows {
+			fmt.Println(err)
 			newDevice := &Device{
 				DeviceID: deviceID,
 			}
@@ -93,12 +97,12 @@ func QrHandler(c *fiber.Ctx) error {
 			if err != nil {
 				fmt.Println(err)
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": err,
+					"error": err,
 				})
 			}
 		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err,
+			"error": err,
 		})
 	}
 
