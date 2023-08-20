@@ -7,7 +7,7 @@ interface TorrentPlayerProps {
 }
 
 export const TorrentPlayer: React.FC<TorrentPlayerProps> = ({ magnetLink }) => {
-  const [torrentClient, setTorrentClient] = useState<WebTorrent | null>(null);
+  const [torrentClient, setTorrentClient] = useState<any>(null);
   const [torrent, setTorrent] = useState<Torrent | null>(null);
 
   useEffect(() => {

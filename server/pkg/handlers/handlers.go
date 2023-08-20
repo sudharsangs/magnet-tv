@@ -8,7 +8,9 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/sudharsangs/magnet-tv/server/pkg/config"
+	"github.com/sudharsangs/magnet-tv/server/pkg/utils"
 	"github.com/uptrace/bun"
 	"github.com/valyala/fasthttp"
 )
@@ -18,10 +20,11 @@ type MagnetLinkBody struct {
 }
 
 type Device struct {
-	bun.BaseModel `bun:"table:devices,alias:d"`
-	DeviceID      string `json:"deviceId"`
-	QRCode        string `json:"qrCode"`
-	UniqueId      string `json:"uniqueId"`
+	bun.BaseModel      `bun:"table:devices,alias:d"`
+	DeviceID           string `json:"deviceId"`
+	QRCodeUrl          string `json:"qrCodeUrl"`
+	UniqueId           string `json:"uniqueId"`
+	UrlQueryParamValue string `json:"urlQueryParamValue"`
 }
 
 func SendMagenetLink(c *fiber.Ctx) error {
@@ -87,19 +90,45 @@ func QrHandler(c *fiber.Ctx) error {
 		Model(&device).
 		Where("device_id = ?", deviceID).Scan(ctx)
 	if err != nil {
-		fmt.Println(err)
 		if err == sql.ErrNoRows {
-			fmt.Println(err)
-			newDevice := &Device{
-				DeviceID: deviceID,
-			}
-			err := db.NewInsert().Model(newDevice)
+			uniqueId := uuid.New().String()
+			urlQueryParamValue := utils.GenerateQueryParamValue(deviceID, uniqueId)
+			webBaseUrl := os.Getenv("WEB_BASE_URL")
+			qrFormUrl := fmt.Sprintf("%vmagnet?slug=%v", webBaseUrl, urlQueryParamValue)
+			imageFile, err := utils.GenerateQRFromURL(qrFormUrl)
+
 			if err != nil {
-				fmt.Println(err)
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 					"error": err,
 				})
 			}
+
+			ctx := context.Background()
+			destinationToPath := "qr/" + uniqueId
+			qrUrl, err := utils.UploadFile(ctx, imageFile, destinationToPath)
+
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": err,
+				})
+			}
+
+			newDevice := &Device{
+				DeviceID:           deviceID,
+				UniqueId:           uniqueId,
+				UrlQueryParamValue: urlQueryParamValue,
+				QRCodeUrl:          qrUrl,
+			}
+			_, dbErr := db.NewInsert().Model(newDevice).Exec(ctx)
+
+			if dbErr != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": dbErr,
+				})
+			}
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"device": newDevice,
+			})
 		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err,

@@ -32,16 +32,22 @@ func GetB2Bucket() (*b2.Bucket, error) {
 	return bucket, nil
 }
 
-func UploadFile(ctx context.Context, bucket *b2.Bucket, writers int, file []byte, dst string) error {
+func UploadFile(ctx context.Context, file []byte, dst string) (string, error) {
 	r := bytes.NewReader(file)
-
+	bucket, err := GetB2Bucket()
+	if err != nil {
+		return "", err
+	}
 	w := bucket.Object(dst).NewWriter(ctx)
+	writers := 4
 	w.ConcurrentUploads = writers
 
 	if _, err := io.Copy(w, r); err != nil {
 		w.Close()
-		return err
+		return "", err
 	}
+	base := bucket.BaseURL()
+	bucketName := bucket.Name()
 
-	return w.Close()
+	return base + "/" + "file" + "/" + bucketName + "/" + dst, w.Close()
 }
