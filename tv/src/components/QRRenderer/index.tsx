@@ -1,20 +1,38 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Image, StyleSheet, Text, View } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
-import { getQrCode } from '../../api';
+import { fetchQrCode } from '../../api';
 
 export const QRRenderer = () => {
+  const [deviceInfo,setDeviceInfo] = useState<any>(null)
+
+
+  const getQrCode = async ():Promise<any> => {
+    try {
+         const response = await fetchQrCode()
+         setDeviceInfo(response?.device)
+    } catch (error) {
+        setDeviceInfo(null)
+    }
+   
+  }
+
+
   useEffect(() => {
-    const response = getQrCode()
-    console.log("resp",response)
+    getQrCode()
   },[])
+
+
   return (
     <LinearGradient colors={['#0e1c26', '#2a454b', '#294861']} style={styles.linearGradient}>
       <Text style={styles.infoTextStyles}>Scan the QR code below to input the magnet link for streaming the torrent.</Text>
       <View style={styles.qrWrapperStyles}>
-        <Text>QRRenderer</Text> 
+        <Image
+          style={styles.imageStyles}
+          source={{uri: deviceInfo?.qrCodeUrl}}
+      /> 
       </View>
-      <Text style={styles.linkTextStyles}>https://localhost:3000/uiwuei</Text>
+      <Text style={styles.linkTextStyles}>{deviceInfo?.qrFormUrl}</Text>
     </LinearGradient>
   )
 }
@@ -51,5 +69,9 @@ const  styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
     fontSize: 18
+  },
+  imageStyles: {
+    width: '100%', 
+    height: '100%'
   }
 })

@@ -23,6 +23,7 @@ type Device struct {
 	bun.BaseModel      `bun:"table:devices,alias:d"`
 	DeviceID           string `json:"deviceId"`
 	QRCodeUrl          string `json:"qrCodeUrl"`
+	QRFormUrl          string `json:"qrFormUrl"`
 	UniqueId           string `json:"uniqueId"`
 	UrlQueryParamValue string `json:"urlQueryParamValue"`
 }
@@ -118,6 +119,7 @@ func QrHandler(c *fiber.Ctx) error {
 				UniqueId:           uniqueId,
 				UrlQueryParamValue: urlQueryParamValue,
 				QRCodeUrl:          qrUrl,
+				QRFormUrl:          qrFormUrl,
 			}
 			_, dbErr := db.NewInsert().Model(newDevice).Exec(ctx)
 
