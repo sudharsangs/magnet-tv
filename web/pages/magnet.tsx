@@ -46,11 +46,11 @@ const MagnetForm = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Magnet TV" />
-        {/* <meta property="og:url" content="https://sudharsangs.in" />
+        <meta property="og:url" content="https://magnet-tv.vercel.app" />
         <meta
           property="og:image"
-          content="https://sudharsangs.in/og-image.jpeg"
-        /> */}
+          content="https://magnet-tv.vercel.app/og_image.jpeg"
+        />
         <meta
           property="og:description"
           content="Magnet TV the coolest torrent streaming app."
