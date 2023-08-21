@@ -1,6 +1,6 @@
 import {getDeviceId} from 'react-native-device-info';
 
-const API_URL = "http://192.168.0.105:3006/"
+export const API_URL = "http://192.168.0.105:3006/"
 
 
 

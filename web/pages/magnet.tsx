@@ -103,7 +103,7 @@ const MagnetForm = () => {
             id="magnetLink"
             value={magnetLink}
             onChange={(e) => setMagnetLink(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 text-gray-900"
             placeholder="Enter a magnet link..."
             required />
           <button

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
-import { fetchQrCode } from '../../api';
+import EventSource, { EventSourceListener } from "react-native-sse";
+import { API_URL, fetchQrCode } from '../../api';
+import { getDeviceId } from 'react-native-device-info';
 
 export const QRRenderer = () => {
   const [deviceInfo,setDeviceInfo] = useState<any>(null)
@@ -10,6 +12,7 @@ export const QRRenderer = () => {
     try {
          const response = await fetchQrCode()
          setDeviceInfo(response?.device)
+         console.log(response?.device)
     } catch (error) {
         setDeviceInfo(null)
     }
@@ -20,6 +23,38 @@ export const QRRenderer = () => {
   useEffect(() => {
     getQrCode()
   },[])
+
+  useEffect(() => {
+    const url = `${API_URL}api/v1/magnet`
+    const deviceId = getDeviceId()
+    const es = new EventSource(url, {
+      headers: {
+        'X-Device-Id': deviceId
+      },
+    });
+    console.log("event", es)
+    const listener: EventSourceListener = (event) => {
+      console.log("event",event)
+      if (event.type === "open") {
+        console.log("Open SSE connection.");
+      } else if (event.type === "message") {
+        console.log(event)
+      } else if (event.type === "error") {
+        console.error("Connection error:", event.message);
+      } else if (event.type === "exception") {
+        console.error("Error:", event.message, event.error);
+      }
+    };
+
+    es.addEventListener("open", listener);
+    es.addEventListener("message", listener);
+    es.addEventListener("error", listener);
+
+    return () => {
+      es.removeAllEventListeners();
+      es.close();
+    };
+  }, []);
 
 
   return (

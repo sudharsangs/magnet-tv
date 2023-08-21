@@ -1,45 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import WebTorrent, { Torrent } from 'webtorrent';
 import Video from 'react-native-video';
 
-interface TorrentPlayerProps {
-  magnetLink: string;
+interface TorrentVideoPlayerProps {
+  magnetURI: string;
 }
 
-export const TorrentPlayer: React.FC<TorrentPlayerProps> = ({ magnetLink }) => {
-  const [torrentClient, setTorrentClient] = useState<any>(null);
+const TorrentVideoPlayer: React.FC<TorrentVideoPlayerProps> = ({ magnetURI }) => {
   const [torrent, setTorrent] = useState<Torrent | null>(null);
+  const [videoBlobURL, setVideoBlobURL] = useState<string | null>(null);
 
   useEffect(() => {
     const client = new WebTorrent();
-    setTorrentClient(client);
+    
+    const torrentInstance = client.add(magnetURI, { path: '/tmp' });
+
+    torrentInstance.on('done', () => {
+      setTorrent(torrentInstance);
+    });
 
     return () => {
-      if (client) {
-        client.destroy();
-      }
+      client.destroy();
     };
-  }, []);
+  }, [magnetURI]);
 
   useEffect(() => {
-    if (torrentClient && magnetLink) {
-      const newTorrent = torrentClient.add(magnetLink);
-      setTorrent(newTorrent);
+    if (torrent) {
+      const file = torrent.files.find((file) => file.name.endsWith('.mp4'));
+      if (file) {
+        const reader = file.createReadStream();
+        const chunks: Uint8Array[] = [];
 
-      newTorrent.on('done', () => {
-        // Torrent download is complete
-      });
+        reader.on('data', (chunk: Uint8Array) => {
+          chunks.push(chunk);
+          if (chunks.length === 1) {
+            const videoBlob = new Blob(chunks, { type: 'video/mp4' });
+            const videoBlobURL = URL.createObjectURL(videoBlob);
+            setVideoBlobURL(videoBlobURL);
+          }
+        });
+
+        reader.on('end', () => {
+          if (chunks.length > 1) {
+            const concatenatedChunks = new Uint8Array(chunks.reduce((totalLength, chunk) => totalLength + chunk.length, 0));
+            let offset = 0;
+            for (const chunk of chunks) {
+              concatenatedChunks.set(chunk, offset);
+              offset += chunk.length;
+            }
+
+            const videoBlob = new Blob([concatenatedChunks], { type: 'video/mp4' });
+            const videoBlobURL = URL.createObjectURL(videoBlob);
+            setVideoBlobURL(videoBlobURL);
+          }
+        });
+      }
     }
-  }, [torrentClient, magnetLink]);
+  }, [torrent]);
 
   return (
     <Video
-      source={{ uri: torrent?.magnetURI || '' }}
-      controls={true}
-      paused={!torrent || torrent.progress !== 1} // Pause if not fully downloaded
+      source={{ uri: videoBlobURL || undefined }}
+      controls
       style={{ flex: 1 }}
     />
   );
 };
 
-
+export default TorrentVideoPlayer;
