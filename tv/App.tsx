@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -17,7 +16,7 @@ import {
   View,
 } from 'react-native';
 
-import { PaperProvider } from 'react-native-paper';
+
 import { QRRenderer } from './src/components/QRRenderer';
 
 
@@ -25,9 +24,9 @@ import { QRRenderer } from './src/components/QRRenderer';
 function App(): JSX.Element {
 
   return (
-    <PaperProvider>
+    <View>
       <QRRenderer/>
-    </PaperProvider>
+    </View>
   );
 }
 

@@ -10,4 +10,5 @@ var RegisterServerRoutes = func(app *fiber.App) {
 	apiV1.Get("/qr", handlers.QrHandler)
 	apiV1.Post("/magnet", handlers.ReceiveMagnetLink)
 	apiV1.Get("/magnet", handlers.SendMagenetLink)
+	apiV1.Get("/slate/:entry", handlers.SlateHandler)
 }

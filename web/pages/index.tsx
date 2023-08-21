@@ -79,9 +79,10 @@ const LandingPage: React.FC = () => {
           content="Concerned about online privacy? Magnet TV employs advanced encryption to keep your streaming activities completely private and secure. Enjoy your shows with peace of mind."
         />
         <FAQItem
-          title="🎬 Curated Viewing"
-          content="Explore new horizons with our thoughtfully curated playlists, handpicked by experts and fellow users. Immerse yourself in a world of infinite entertainment options."
-        />
+  title="🎬 Instant Streaming"
+  content="With Magnet TV, you're just a click away from enjoying your favorite TV shows and movies. Stream seamlessly from magnet links without any delays or buffering. Say goodbye to downloads and enjoy instant entertainment at your fingertips."
+/>
+
         </div>
       </div>
       <div className="space-y-6">

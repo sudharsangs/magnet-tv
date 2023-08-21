@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -48,6 +49,6 @@ func UploadFile(ctx context.Context, file []byte, dst string) (string, error) {
 	}
 	base := bucket.BaseURL()
 	bucketName := bucket.Name()
-
-	return base + "/" + "file" + "/" + bucketName + "/" + dst, w.Close()
+	uploadedUrl := fmt.Sprintf("%v/file/%v/%v", base, bucketName, dst)
+	return uploadedUrl, w.Close()
 }

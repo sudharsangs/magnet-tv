@@ -6,7 +6,6 @@ import { fetchQrCode } from '../../api';
 export const QRRenderer = () => {
   const [deviceInfo,setDeviceInfo] = useState<any>(null)
 
-
   const getQrCode = async ():Promise<any> => {
     try {
          const response = await fetchQrCode()
