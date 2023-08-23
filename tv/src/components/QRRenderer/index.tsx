@@ -32,13 +32,13 @@ export const QRRenderer = () => {
         'X-Device-Id': deviceId
       },
     });
-    console.log("event", es)
+
     const listener: EventSourceListener = (event) => {
       console.log("event",event)
       if (event.type === "open") {
         console.log("Open SSE connection.");
       } else if (event.type === "message") {
-        console.log(event)
+        console.log(event.data)
       } else if (event.type === "error") {
         console.error("Connection error:", event.message);
       } else if (event.type === "exception") {

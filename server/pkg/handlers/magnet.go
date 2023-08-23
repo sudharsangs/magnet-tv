@@ -33,6 +33,8 @@ func SendMagenetLink(c *fiber.Ctx) error {
 	ctx := context.Background()
 	deviceID := c.Get("X-Device-Id")
 
+	fmt.Println(deviceID)
+
 	channelName := os.Getenv("REDIS_CHANNEL_NAME")
 
 	pubsub := rdb.Subscribe(ctx, channelName)
@@ -43,6 +45,7 @@ func SendMagenetLink(c *fiber.Ctx) error {
 		for msg := range msgCh {
 			var message MessageBody
 			if err := json.Unmarshal([]byte(msg.Payload), &message); err != nil {
+				fmt.Println("48", err)
 				fmt.Printf("Error while flushing: %v. Closing http connection.\n", err)
 			}
 			if deviceID == message.DeviceID {
@@ -51,6 +54,7 @@ func SendMagenetLink(c *fiber.Ctx) error {
 			}
 			err := w.Flush()
 			if err != nil {
+				fmt.Println("56", err)
 				fmt.Printf("Error while flushing: %v. Closing http connection.\n", err)
 				break
 			}

@@ -6,16 +6,22 @@ import { useState, FormEvent, useEffect } from 'react';
 import { API_URL } from "@/app/constants"
 
 const MagnetForm = () => {
-  const [magnetLink, setMagnetLink] = useState<string>('');
+  const [magnetLink, setMagnetLink] = useState<string>('')
+  const [errorMessage,setErrorMessage] = useState<string>('')
   const [isSlateValid,setIsSlateValid] = useState<boolean>(false)
   const [isLoading,setIsLoading] = useState<boolean>(true)
 
   const {query} = useRouter()
   const slate = query.slate
 
+    const isMagnetLink = (link: string): boolean => {
+        const magnetPrefix = "magnet:?";
+        return link.startsWith(magnetPrefix);
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+    if(isMagnetLink(magnetLink)){
     try {
       const url = `${API_URL}api/v1/magnet`
       const response = await fetch(url, {
@@ -36,6 +42,9 @@ const MagnetForm = () => {
     } catch (error) {
       console.error('An error occurred:', error);
     }
+  }else{
+    setErrorMessage("Please enter a valid Magnet link!")
+  }
   };
 
   const verifySlate = async () => {
@@ -50,6 +59,8 @@ const MagnetForm = () => {
       setIsLoading(false)
     }
   }
+
+
 
   useEffect(() => {
     if(slate  && slate.length > 1){
@@ -93,7 +104,9 @@ const MagnetForm = () => {
         <div className="mt-4 h-8 w-1/2 bg-gray-700 rounded"></div>
        </div>
 
-      ) : isSlateValid ? <div className="max-w-md mx-auto p-6 bg-gradient-to-r from-gray-800 to-zinc-900 shadow-md rounded-md">
+      ) : isSlateValid ? 
+      <>
+      <div className="max-w-md mx-auto p-6 bg-gradient-to-r from-gray-800 to-zinc-900 shadow-md rounded-md">
         <form onSubmit={handleSubmit}>
           <label className="block mb-2 font-medium" htmlFor="magnetLink">
             Magnet Link
@@ -102,7 +115,7 @@ const MagnetForm = () => {
             type="text"
             id="magnetLink"
             value={magnetLink}
-            onChange={(e) => setMagnetLink(e.target.value)}
+            onChange={(e) =>{setErrorMessage(""); setMagnetLink(e.target.value)}}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 text-gray-900"
             placeholder="Enter a magnet link..."
             required />
@@ -110,10 +123,14 @@ const MagnetForm = () => {
             type="submit"
             className="mt-4 w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
           >
-            Send Magnet Link
+            Start Streaming
           </button>
         </form>
-      </div> : <div className="flex flex-col items-center justify-center">
+      </div>
+      {errorMessage?.length > 0 ? <p className="text-red-500 text-xl font-medium text-center">{errorMessage}</p> : null}
+      </> 
+      : 
+      <div className="flex flex-col items-center justify-center">
         <p className="text-red-500 text-xl font-medium text-center">Error: Page Invalid!<br/> Kindly refrain from altering the URL sourced from the QR code.</p>
       </div>}
     </div>

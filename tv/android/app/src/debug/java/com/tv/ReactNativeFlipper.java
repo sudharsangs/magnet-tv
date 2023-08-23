@@ -25,8 +25,10 @@ import com.facebook.react.modules.network.NetworkingModule;
 import okhttp3.OkHttpClient;
 
 /**
- * Class responsible of loading Flipper inside your React Native application. This is the debug
- * flavor of it. Here you can add your own plugins and customize the Flipper setup.
+ * Class responsible of loading Flipper inside your React Native application.
+ * This is the debug
+ * flavor of it. Here you can add your own plugins and customize the Flipper
+ * setup.
  */
 public class ReactNativeFlipper {
   public static void initializeFlipper(Context context, ReactInstanceManager reactInstanceManager) {
@@ -39,13 +41,14 @@ public class ReactNativeFlipper {
       client.addPlugin(CrashReporterPlugin.getInstance());
 
       NetworkFlipperPlugin networkFlipperPlugin = new NetworkFlipperPlugin();
-      NetworkingModule.setCustomClientBuilder(
-          new NetworkingModule.CustomClientBuilder() {
-            @Override
-            public void apply(OkHttpClient.Builder builder) {
-              builder.addNetworkInterceptor(new FlipperOkhttpInterceptor(networkFlipperPlugin));
-            }
-          });
+      // NetworkingModule.setCustomClientBuilder(
+      // new NetworkingModule.CustomClientBuilder() {
+      // @Override
+      // public void apply(OkHttpClient.Builder builder) {
+      // builder.addNetworkInterceptor(new
+      // FlipperOkhttpInterceptor(networkFlipperPlugin));
+      // }
+      // });
       client.addPlugin(networkFlipperPlugin);
       client.start();
 
