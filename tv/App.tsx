@@ -1,35 +1,19 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { QRRenderer } from './src/components/QRRenderer';
+import {TorrentPlayer} from './src/components/TorrentPlayer';
 
+const Stack = createStackNavigator();
 
-
-function App(): JSX.Element {
-
-  return (
-    <View>
-      <QRRenderer/>
-    </View>
-  );
-}
-
-
+const App = () => (
+  <NavigationContainer>
+    <Stack.Navigator initialRouteName="QRRenderer">
+      <Stack.Screen name="QRRenderer" component={QRRenderer} />
+      <Stack.Screen name="TorrentPlayer" component={TorrentPlayer} />
+    </Stack.Navigator>
+  </NavigationContainer>
+);
 
 export default App;
+
+

@@ -4,9 +4,14 @@ import LinearGradient from 'react-native-linear-gradient';
 import EventSource, { EventSourceListener } from "react-native-sse";
 import { API_URL, fetchQrCode } from '../../api';
 import { getDeviceId } from 'react-native-device-info';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export const QRRenderer = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
+
+export const QRRenderer = ({navigation}) => {
   const [deviceInfo,setDeviceInfo] = useState<any>(null)
+
+
 
   const getQrCode = async ():Promise<any> => {
     try {
@@ -18,6 +23,10 @@ export const QRRenderer = () => {
     }
    
   }
+
+  const handleMagnetLinkReceived = (magnetLink: string) => {
+    navigation.navigate('TorrentPlayer')
+  };
 
 
   useEffect(() => {
